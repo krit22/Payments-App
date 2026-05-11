@@ -7,7 +7,6 @@ export function authMiddleware(
     next: NextFunction
 ) {
     const authHeader = req.headers.authorization;
-
     if (!authHeader) {
         res.status(401).json({
             message: "Token missing"
@@ -15,20 +14,28 @@ export function authMiddleware(
         return;
     }
 
+
     try {
         const decoded = jwt.verify(
             authHeader,
             process.env.JWT_SECRET as string
         );
-
+        if (!req.body) {
+            req.body = {
+                username: "null"
+            }
+        }
+        req.body.userId = (decoded as any).userId;
         req.body.userId = (decoded as any).userId;
 
         next();
 
     } catch (error) {
-        res.status(401).json({
-            message: "Invalid token"
+
+
+        return res.status(401).json({
+            message: "Invalid token",
+            error: error
         });
-        return;
     }
 }

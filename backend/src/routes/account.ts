@@ -29,7 +29,7 @@ accountRouter.post("/transfer", authMiddleware, async (req, res) => {
     const result = transferSchema.safeParse(req.body)
 
     if (!result.success) {
-        res.json({
+        res.status(400).json({
             message: "Could not transfer",
             error: "Input valudation failed"
         })
@@ -54,7 +54,7 @@ accountRouter.post("/transfer", authMiddleware, async (req, res) => {
 
             const toAccount = await tx.account.findFirst({
                 where: {
-                    userId: toAccountId
+                    id: toAccountId
                 }
             })
 
@@ -87,7 +87,11 @@ accountRouter.post("/transfer", authMiddleware, async (req, res) => {
             });
 
         })
+
+        res.status(200).json({
+            message: "Transfer successful"
+        });
     } catch (e) {
-        res.status(400).json({ message: "Transfer failed" });
+        res.status(400).json({ message: "Transfer failed", e });
     }
 })

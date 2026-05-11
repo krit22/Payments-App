@@ -82,7 +82,6 @@ userRouter.post("/signin", async (req, res) => {
         return
     }
 
-    const hashedPassword = await bcrypt.hash(result.data.password, 3);
 
     const user = await prisma.user.findUnique({
         where: {
@@ -91,7 +90,7 @@ userRouter.post("/signin", async (req, res) => {
     })
 
     if (!user) {
-        res.json({
+        res.status(400).json({
             message: "Login failed",
             error: "User not found"
         })
@@ -100,10 +99,10 @@ userRouter.post("/signin", async (req, res) => {
     }
 
     console.log("User found..")
-    const passwordMatch = bcrypt.compare(result.data.password, user.password);
+    const passwordMatch = await bcrypt.compare(result.data.password, user.password);
 
     if (!passwordMatch) {
-        res.json({
+        res.status(400).json({
             message: "Signin Failed",
             error: "Incorrect password"
         })
@@ -112,8 +111,6 @@ userRouter.post("/signin", async (req, res) => {
     }
 
     console.log("Password verified..")
-
-
 
     const token = jwt.sign({
         userId: user.id
